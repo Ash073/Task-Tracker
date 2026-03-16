@@ -60,9 +60,12 @@ export default function Layout() {
 
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         {/* Logo */}
-        <div className="sidebar-brand">
-          <div className="sidebar-brand-name">TaskTracker</div>
-          <div className="sidebar-brand-sub">Productivity Suite</div>
+        <div className="sidebar-brand" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px' }} />
+          <div>
+            <div className="sidebar-brand-name">TaskTracker</div>
+            <div className="sidebar-brand-sub">CORE ENGINE</div>
+          </div>
         </div>
 
         {/* Mode Toggle */}

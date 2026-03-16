@@ -28,8 +28,9 @@ export default function RegisterPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
+          <img src="/logo.png" alt="TaskTracker" style={{ width: '80px', height: '80px', marginBottom: '16px' }} />
           <div className="auth-logo-text">TaskTracker</div>
-          <div className="auth-logo-sub">ORGANIZE YOUR LIFE</div>
+          <div className="auth-logo-sub">DECENTRALIZE YOUR TASK MANAGEMENT</div>
         </div>
 
         <div className="card" style={{ padding: '40px' }}>

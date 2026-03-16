@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  Image,
 } from 'react-native';
 import Animated, { 
   useSharedValue, 
@@ -191,6 +192,9 @@ export default function DashboardScreen() {
 
       {/* Header */}
       <View style={s.headerContainer}>
+        <View style={{ alignItems: 'center', marginBottom: 20 }}>
+           <Image source={require('../../assets/logo.png')} style={{ width: 60, height: 60, marginBottom: 10 }} />
+        </View>
         <View style={s.topStatusRow}>
           <View style={s.statusBadge}>
             <View style={{ width: 12, height: 12, justifyContent: 'center', alignItems: 'center' }}>

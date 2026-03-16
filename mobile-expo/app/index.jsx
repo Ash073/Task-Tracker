@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, ImageBackground, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ImageBackground, Dimensions, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../src/store';
 import { Colors } from '../src/config/theme';
@@ -32,7 +32,7 @@ export default function LandingScreen() {
       <View style={s.content}>
         <View style={s.header}>
           <View style={s.logoIcon}>
-            <MaterialCommunityIcons name="lightning-bolt" size={40} color={Colors.white} />
+            <Image source={require('../assets/logo.png')} style={s.logoImage} />
           </View>
           <Text style={s.title}>
             <Text style={{ color: Colors.accent }}>Task</Text>Tracker
@@ -101,7 +101,13 @@ const s = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.4,
     shadowRadius: 15,
-    elevation: 10
+    elevation: 10,
+    overflow: 'hidden'
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain'
   },
   title: { fontSize: 42, fontWeight: '900', color: Colors.text, letterSpacing: -2 },
   subtitle: { color: Colors.text2, fontSize: 16, fontWeight: '600', marginTop: 8, opacity: 0.7 },

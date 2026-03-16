@@ -28,8 +28,9 @@ export default function LoginPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-logo">
+          <img src="/logo.png" alt="TaskTracker" style={{ width: '80px', height: '80px', marginBottom: '16px' }} />
           <div className="auth-logo-text">TaskTracker</div>
-          <div className="auth-logo-sub">YOUR PRODUCTIVITY HUB</div>
+          <div className="auth-logo-sub">YOUR PRODUCTIVITY DASHBOARD</div>
         </div>
 
         <div className="card" style={{ padding: '40px' }}>

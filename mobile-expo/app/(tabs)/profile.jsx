@@ -163,6 +163,9 @@ export default function ProfileScreen() {
       onScroll={handleScroll}
       scrollEventThrottle={16}
     >
+      <View style={{ alignItems: 'center', marginBottom: 20 }}>
+        <Image source={require('../../assets/logo.png')} style={{ width: 80, height: 80 }} />
+      </View>
       <Text style={st.pageTitle}>Profile</Text>
 
       {/* Profile Card */}
@@ -171,7 +174,7 @@ export default function ProfileScreen() {
             <View style={{ flex: 1 }}>
               <Pressable style={st.avatar} onPress={handleAvatarPress}>
                 {user?.avatarUrl ? (
-                  <Image source={{ uri: user.avatarUrl }} style={st.avatarImage} />
+                   <Image source={{ uri: user.avatarUrl }} style={st.avatarImage} />
                 ) : (
                   <Text style={st.avatarText}>{user?.name?.[0]?.toUpperCase()}</Text>
                 )}

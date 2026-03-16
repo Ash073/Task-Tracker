@@ -5,6 +5,7 @@ import { useAuthStore } from './store';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import TasksPage from './pages/TasksPage';
 import ShoppingPage from './pages/ShoppingPage';
@@ -15,7 +16,7 @@ import './styles/global.css';
 
 function PrivateRoute({ children }) {
   const isAuthenticated = useAuthStore(s => s.isAuthenticated);
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  return isAuthenticated ? children : <Navigate to="/landing" replace />;
 }
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
         }}
       />
       <Routes>
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
