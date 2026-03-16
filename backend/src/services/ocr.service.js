@@ -15,21 +15,29 @@ async function extractTextFromImage(imagePath) {
   formData.append('isOverlayRequired', 'false');
   formData.append('detectOrientation', 'true');
   formData.append('scale', 'true');
-  formData.append('OCREngine', '2'); // Engine 2 is better for handwriting and numeric data
-  formData.append('isTable', 'true'); // Helps preserve line-by-line structure for lists
+  formData.append('OCREngine', '2'); // Engine 2 is specifically for handwritten text
+  formData.append('isCreateSearchablePdf', 'false');
 
   try {
+    console.log(`[OCR] Starting extraction for ${imagePath} using Engine 2...`);
     const response = await axios.post('https://api.ocr.space/parse/image', formData, {
       headers: {
         ...formData.getHeaders(),
       },
-      timeout: 60000 // Increase timeout to 60s for handwritten/large images
+      timeout: 150000, // 2.5 minutes for API response
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity
     });
 
+    console.log(`[OCR] API Response received. Status: ${response.status}`);
+
     if (response.data && response.data.ParsedResults && response.data.ParsedResults.length > 0) {
-      return response.data.ParsedResults[0].ParsedText;
+      const text = response.data.ParsedResults[0].ParsedText;
+      console.log(`[OCR] Successfully extracted ${text.length} characters.`);
+      return text;
     } else {
       const errorMsg = response.data?.ErrorMessage || response.data?.ErrorDetails || 'OCR.space failed to parse image';
+      console.error(`[OCR API Error] ${JSON.stringify(response.data)}`);
       throw new Error(errorMsg);
     }
   } catch (err) {

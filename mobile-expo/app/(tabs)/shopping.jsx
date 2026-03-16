@@ -32,6 +32,9 @@ export default function ShoppingScreen() {
   const [newItem, setNewItem] = useState({ name: '', quantity: '1', unit: '', cost: '0', notes: '' });
   const [ocrLoading, setOcrLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [showOcrGuide, setShowOcrGuide] = useState(false);
+  const [pendingOcrType, setPendingOcrType] = useState(null); // 'gallery' or 'camera'
+  const [editingIndex, setEditingIndex] = useState(null);
 
   const setShowTopBar = useUIStore(s => s.setShowTopBar);
   const lastOffset = useRef(0);
@@ -104,6 +107,17 @@ export default function ShoppingScreen() {
     }
   };
 
+  const openOcrWithGuide = (type) => {
+    setPendingOcrType(type);
+    setShowOcrGuide(true);
+  };
+
+  const proceedWithOcr = () => {
+    setShowOcrGuide(false);
+    if (pendingOcrType === 'gallery') handleOCR();
+    else if (pendingOcrType === 'camera') handleCameraOCR();
+  };
+
   const handleOCR = async () => {
     try {
       const permResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -130,8 +144,6 @@ export default function ShoppingScreen() {
       const missing = items.filter(it => it.quantity === null).length;
       if (missing > 0) {
         Alert.alert('Data Refinement Needed', `Processed ${items.length} items. ${missing} items missing quantities. Please fill them in.`);
-      } else {
-        Alert.alert('OCR Done', `Extracted ${items.length} items`);
       }
     } catch (err) {
       Alert.alert('Error', 'OCR failed: ' + (err.response?.data?.error || err.message));
@@ -159,14 +171,12 @@ export default function ShoppingScreen() {
       });
 
       const res = await api.post('/upload/ocr/base64', { data: base64, extension: '.jpg' });
-      setNewList((l) => ({ ...l, items: [...l.items, ...res.data.items] }));
-      setShowModal(true);
       const items = res.data.items || [];
+      setNewList((l) => ({ ...l, items: [...l.items, ...items] }));
+      setShowModal(true);
       const missing = items.filter(it => it.quantity === null).length;
       if (missing > 0) {
         Alert.alert('Data Refinement Needed', `Processed ${items.length} items. ${missing} items missing quantities. Please fill them in.`);
-      } else {
-        Alert.alert('OCR Done', `Extracted ${items.length} items`);
       }
     } catch (err) {
       Alert.alert('Error', 'OCR failed: ' + (err.response?.data?.error || err.message));
@@ -202,10 +212,10 @@ export default function ShoppingScreen() {
             <Pressable style={st.ghostBtn} onPress={handleExcelImport}>
               <Feather name="file-text" size={16} color={Colors.text2} />
             </Pressable>
-            <Pressable style={st.ghostBtn} onPress={handleOCR} disabled={ocrLoading}>
+            <Pressable style={st.ghostBtn} onPress={() => openOcrWithGuide('gallery')} disabled={ocrLoading}>
               <Feather name="image" size={16} color={ocrLoading ? Colors.text3 : Colors.accent} />
             </Pressable>
-            <Pressable style={st.ghostBtn} onPress={handleCameraOCR} disabled={ocrLoading}>
+            <Pressable style={st.ghostBtn} onPress={() => openOcrWithGuide('camera')} disabled={ocrLoading}>
               <Feather name="camera" size={16} color={ocrLoading ? Colors.text3 : Colors.accent} />
             </Pressable>
             <Pressable style={st.primaryBtn} onPress={() => setShowModal(true)}>
@@ -358,8 +368,21 @@ export default function ShoppingScreen() {
                     />
                   </View>
                 </View>
-                <Pressable style={st.ghostBtn} onPress={handleAddItem}>
-                  <Text style={st.ghostBtnText}>+ Add Item</Text>
+                <Pressable 
+                  style={[st.ghostBtn, { backgroundColor: editingIndex !== null ? 'rgba(59, 130, 246, 0.1)' : 'transparent' }]} 
+                  onPress={() => {
+                    if (editingIndex !== null) {
+                      const updatedItems = [...newList.items];
+                      updatedItems[editingIndex] = { ...newItem, quantity: parseFloat(newItem.quantity) || 0, cost: parseFloat(newItem.cost) || 0 };
+                      setNewList(l => ({ ...l, items: updatedItems }));
+                      setEditingIndex(null);
+                      setNewItem({ name: '', quantity: '1', unit: '', cost: '0', notes: '' });
+                    } else {
+                      handleAddItem();
+                    }
+                  }}
+                >
+                  <Text style={st.ghostBtnText}>{editingIndex !== null ? 'Update Item' : '+ Add Item'}</Text>
                 </Pressable>
               </View>
 
@@ -367,17 +390,34 @@ export default function ShoppingScreen() {
               {newList.items.length > 0 && (
                 <View style={{ marginBottom: 16 }}>
                   {newList.items.map((item, i) => (
-                    <View key={i} style={[st.previewItem, { alignItems: 'center' }]}>
-                      <Text style={{ color: Colors.text, fontSize: 13, flex: 1 }}>
-                        {item.name} × {item.quantity === null ? (
-                          <Text style={{ color: Colors.high, fontWeight: '800' }}>Enter Qty</Text>
-                        ) : (
-                          `${item.quantity} ${item.unit}`
-                        )}
-                      </Text>
+                    <View key={i} style={[st.previewItem, { alignItems: 'center' }, editingIndex === i && { backgroundColor: 'rgba(59, 130, 246, 0.05)' }]}>
+                      <Pressable 
+                        style={{ flex: 1 }}
+                        onPress={() => {
+                          setEditingIndex(i);
+                          setNewItem({
+                            name: item.name,
+                            quantity: item.quantity === null ? '' : item.quantity.toString(),
+                            unit: item.unit || '',
+                            cost: item.cost ? item.cost.toString() : '0',
+                            notes: item.notes || ''
+                          });
+                        }}
+                      >
+                        <Text style={{ color: Colors.text, fontSize: 13 }}>
+                          {item.name} × {item.quantity === null ? (
+                            <Text style={{ color: Colors.high, fontWeight: '800' }}>Enter Qty</Text>
+                          ) : (
+                            `${item.quantity} ${item.unit}`
+                          )}
+                        </Text>
+                      </Pressable>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                         <Text style={{ color: Colors.low, fontSize: 13 }}>₹{(item.cost * (item.quantity || 0)).toFixed(2)}</Text>
-                        <Pressable onPress={() => setNewList(l => ({ ...l, items: l.items.filter((_, idx) => idx !== i) }))}>
+                        <Pressable onPress={() => {
+                          if (editingIndex === i) setEditingIndex(null);
+                          setNewList(l => ({ ...l, items: l.items.filter((_, idx) => idx !== i) }));
+                        }}>
                           <Feather name="x-circle" size={16} color={Colors.text3} />
                         </Pressable>
                       </View>
@@ -395,6 +435,54 @@ export default function ShoppingScreen() {
                 </Pressable>
               </View>
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+      {/* OCR Guide Modal */}
+      <Modal visible={showOcrGuide} transparent animationType="fade">
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ backgroundColor: Colors.card, width: '100%', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: Colors.accent }}>
+            <View style={{ alignItems: 'center', marginBottom: 20 }}>
+              <View style={{ backgroundColor: 'rgba(59,130,246,0.1)', padding: 16, borderRadius: 50, marginBottom: 16 }}>
+                <Feather name="info" size={32} color={Colors.accent} />
+              </View>
+              <Text style={{ fontSize: 20, fontWeight: '800', color: Colors.text, textAlign: 'center' }}>Extraction Guide</Text>
+            </View>
+            
+            <View style={{ gap: 16, marginBottom: 24 }}>
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: Colors.accent, alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ color: Colors.white, fontWeight: '800', fontSize: 12 }}>1</Text>
+                </View>
+                <Text style={{ flex: 1, color: Colors.text, fontSize: 14 }}>To extract handwritten lists, please focus <Text style={{ fontWeight: '800', color: Colors.accent }}>only on the written part</Text> of the paper.</Text>
+              </View>
+              
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: Colors.accent, alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ color: Colors.white, fontWeight: '800', fontSize: 12 }}>2</Text>
+                </View>
+                <Text style={{ flex: 1, color: Colors.text, fontSize: 14 }}>For receipts or printed invoices, ensure you capture <Text style={{ fontWeight: '800', color: Colors.accent }}>only the printed items</Text> clearly.</Text>
+              </View>
+
+              <View style={{ backgroundColor: 'rgba(255,255,255,0.03)', padding: 12, borderRadius: 12, borderLeftWidth: 3, borderLeftColor: 'gray' }}>
+                <Text style={{ fontSize: 12, color: Colors.text2, fontStyle: 'italic' }}>Note: Mixing printed and handwritten text in one image may lead to merged items. Choose one for best results.</Text>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <Pressable 
+                style={[st.ghostBtn, { flex: 1, height: 50, width: 'auto' }]} 
+                onPress={() => setShowOcrGuide(false)}
+              >
+                <Text style={st.ghostBtnText}>Cancel</Text>
+              </Pressable>
+              <Pressable 
+                style={[st.primaryBtn, { flex: 2, height: 50 }]} 
+                onPress={proceedWithOcr}
+              >
+                <Text style={st.primaryBtnText}>Begin Extraction</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </Modal>

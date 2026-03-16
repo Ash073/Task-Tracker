@@ -4,7 +4,7 @@ import API_BASE_URL from '../config/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 90000, // Increased to 90s for OCR and data-heavy uploads
+  timeout: 180000, // Matched with backend server timeout
 });
 
 api.interceptors.request.use(async (config) => {

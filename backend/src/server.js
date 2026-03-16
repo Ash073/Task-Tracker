@@ -46,8 +46,10 @@ app.use((err, req, res, next) => {
 
 connectDB().then(() => {
   const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`TaskTracker backend running on port ${PORT}`);
     initScheduler();
   });
+  // Extend server timeout to 3 minutes for heavy AI/OCR tasks
+  server.timeout = 180000;
 });
