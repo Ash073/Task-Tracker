@@ -14,9 +14,9 @@ router.post('/register', async (req, res) => {
     if (!name || !email || !password) return res.status(400).json({ error: 'All fields required' });
     const exists = await User.findOne({ email });
     if (exists) return res.status(409).json({ error: 'Email already registered' });
-    const user = await User.create({ name, email, password, goal });
+    const user = await User.create({ name, email, password, goal, xp: 0, level: 1, mode: 'simple', streak: 0 });
     const token = signToken(user.id);
-    res.status(201).json({ token, user: { _id: user.id, name, email, goal, xp: 0, level: 1, mode: 'simple', avatarUrl: null } });
+    res.status(201).json({ token, user });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

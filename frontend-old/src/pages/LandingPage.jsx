@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store';
 import { useEffect } from 'react';
-import { FiArrowRight, FiZap, FiShield, FiActivity } from 'react-icons/fi';
+import { FiArrowRight } from 'react-icons/fi';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -14,67 +14,101 @@ export default function LandingPage() {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div className="auth-page" style={{ 
-      flexDirection: 'column', 
-      background: 'radial-gradient(circle at top right, rgba(79, 70, 229, 0.15), transparent), radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.1), transparent)' 
+    <div style={{ 
+      minHeight: '100vh',
+      backgroundColor: '#0a0a0b',
+      color: '#ffffff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '40px',
+      fontFamily: '"Inter", sans-serif',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
-      <div className="auth-card" style={{ maxWidth: '800px', textAlign: 'center' }}>
-        <div style={{ marginBottom: '60px' }}>
-          <img src="/logo.png" alt="TaskTracker" style={{ width: '120px', height: '120px', marginBottom: '24px' }} />
+      {/* Background Ambience */}
+      <div style={{
+        position: 'absolute',
+        top: '-10%',
+        right: '-10%',
+        width: '600px',
+        height: '600px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%)',
+        zIndex: 0
+      }} />
+
+      <div style={{ maxWidth: '640px', textAlign: 'center', zIndex: 1 }}>
+        <div style={{ marginBottom: '40px' }}>
+          <img src="/logo.png" alt="Logo" style={{ width: '140px', height: '140px', marginBottom: '32px' }} />
           <h1 style={{ 
-            fontSize: '56px', 
-            fontWeight: 900, 
+            fontSize: '64px', 
+            fontWeight: 800, 
             letterSpacing: '-2px', 
-            marginBottom: '16px',
-            background: 'linear-gradient(135deg, #fff, #94a3b8)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            display: 'inline-block'
+            marginBottom: '24px',
+            color: '#fff'
           }}>
-            Task<span style={{ color: 'var(--accent)' }}>Tracker</span>
+            Achieve More.
           </h1>
-          <p style={{ color: 'var(--text2)', fontSize: '20px', fontWeight: 500, maxWidth: '600px', margin: '0 auto' }}>
-            The ultimate AI-powered environment for goal achievement and precision task optimization.
+          <p style={{ 
+            color: '#94a3b8', 
+            fontSize: '20px', 
+            lineHeight: '1.6', 
+            marginBottom: '48px',
+            fontWeight: 400
+          }}>
+            Minimal design. Powerful results. The professional way to manage your tasks and reach your milestones.
           </p>
         </div>
 
-        <div className="grid-3" style={{ marginBottom: '60px' }}>
-          <div className="card" style={{ padding: '32px', textAlign: 'left' }}>
-            <FiZap style={{ fontSize: '24px', color: 'var(--accent)', marginBottom: '16px' }} />
-            <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>AI Optimization</h3>
-            <p style={{ color: 'var(--text3)', fontSize: '14px' }}>Smart scheduling that adapts to your habits and priorities.</p>
-          </div>
-          <div className="card" style={{ padding: '32px', textAlign: 'left' }}>
-            <FiShield style={{ fontSize: '24px', color: 'var(--low)', marginBottom: '16px' }} />
-            <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Secure Sync</h3>
-            <p style={{ color: 'var(--text3)', fontSize: '14px' }}>Your data is encrypted and synchronized across all devices.</p>
-          </div>
-          <div className="card" style={{ padding: '32px', textAlign: 'left' }}>
-            <FiActivity style={{ fontSize: '24px', color: 'var(--high)', marginBottom: '16px' }} />
-            <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Data Extraction</h3>
-            <p style={{ color: 'var(--text3)', fontSize: '14px' }}>Automatic task capturing from multiple sources and documents.</p>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', alignItems: 'center' }}>
           <button 
-            className="btn btn-primary" 
-            style={{ padding: '16px 40px', fontSize: '16px', borderRadius: '16px', fontWeight: 700 }}
+            style={{ 
+              backgroundColor: 'var(--accent)',
+              color: '#fff',
+              border: 'none',
+              padding: '18px 48px',
+              fontSize: '18px',
+              borderRadius: '32px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              transition: 'transform 0.2s'
+            }}
             onClick={() => navigate('/login')}
           >
-            SIGN IN TO ENGINE <FiArrowRight style={{ marginLeft: '8px' }} />
+            Sign In <FiArrowRight size={20} />
           </button>
+          
           <button 
-            className="btn btn-ghost" 
-            style={{ padding: '16px 40px', fontSize: '16px', borderRadius: '16px', fontWeight: 700 }}
+            style={{ 
+              backgroundColor: 'transparent',
+              color: '#94a3b8',
+              border: '1.5px solid #334155',
+              padding: '18px 48px',
+              fontSize: '18px',
+              borderRadius: '32px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
             onClick={() => navigate('/register')}
           >
-            INITIALIZE NEW ACCOUNT
+            Create Account
           </button>
         </div>
 
-        <div style={{ marginTop: '80px', color: 'var(--text3)', fontSize: '12px', letterSpacing: '2px', fontWeight: 700 }}>
-          SECURE TERMINAL ACCESS V1.0.0
+        <div style={{ 
+          marginTop: '100px', 
+          color: '#334155', 
+          fontSize: '12px', 
+          letterSpacing: '3px', 
+          fontWeight: 800,
+          textTransform: 'uppercase'
+        }}>
+          Professional Workspace
         </div>
       </div>
     </div>

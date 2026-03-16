@@ -84,20 +84,20 @@ export default function DashboardPage() {
             {/* System Status Badge */}
             <div style={{
               display: 'flex', alignItems: 'center', gap: '10px',
-              padding: '8px 16px', borderRadius: '12px',
-              background: 'rgba(16, 185, 129, 0.08)',
-              border: '1px solid rgba(16, 185, 129, 0.2)',
-              boxShadow: '0 4px 20px rgba(16, 185, 129, 0.1)'
+              padding: '10px 20px', borderRadius: '30px',
+              background: 'rgba(16, 185, 129, 0.05)',
+              border: '1.5px solid rgba(16, 185, 129, 0.25)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
             }}>
               <div 
                 className="pulse-glow"
                 style={{ 
                   width: '8px', height: '8px', borderRadius: '50%', background: '#10b981',
-                  boxShadow: '0 0 10px #10b981'
+                  boxShadow: '0 0 12px rgba(16, 185, 129, 0.8)'
                 }} 
               />
-              <span style={{ fontSize: '12px', fontWeight: 800, color: '#10b981', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                {t('system_operational')}
+              <span style={{ fontSize: '12px', fontWeight: 900, color: '#10b981', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+                {criticalTasks.length > 0 ? t('system_standby') : t('system_operational')}
               </span>
             </div>
             

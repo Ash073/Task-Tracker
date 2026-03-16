@@ -2,7 +2,7 @@ const schedule = require('node-schedule');
 const { Expo } = require('expo-server-sdk');
 const NotificationLog = require('../models/notification.model');
 const { generateMotivationQuote } = require('./apiAI.service');
-const { getReminderStrength } = require('./localAI.service');
+const { getReminderStrength, getLocalQuote } = require('./localAI.service');
 
 const expo = new Expo();
 const jobRegistry = new Map();
@@ -35,12 +35,13 @@ async function scheduleTaskNotification(task, user) {
 
   // 1. 5 Minutes Before Start
   safeSchedule(`prep_${task._id}`, new Date(startTime.getTime() - 5 * 60000), async () => {
+    const quote = getLocalQuote(task.priority, user.detectedGoal || user.goal);
     await logAndNotify(user, {
       taskId: task._id,
       type: 'critical',
-      title: `🚀 Deployment Preview: ${task.name}`,
-      body: `Initial phase starts in 5 minutes. Ready to maintain your streak?`,
-      quote: "Success is preparation meeting opportunity.",
+      title: `🚀 Preparing: ${task.name}`,
+      body: `Starts in 5 minutes. Ready to maintain your streak?`,
+      quote: quote || "Success is preparation meeting opportunity.",
     });
   });
 
@@ -55,29 +56,29 @@ async function scheduleTaskNotification(task, user) {
     await logAndNotify(user, {
       taskId: task._id,
       type: 'reminder',
-      title: `⚡ System Execute: ${task.name}`,
-      body: `Operation "${task.name}" is now active. Target duration: ${duration}min.`,
-      quote,
+      title: `⚡ Action: ${task.name}`,
+      body: `"${task.name}" is now live. Focus and execute.`,
+      quote: quote || "Focus on the task at hand.",
     });
   });
 
-  // 3. 5 Minutes After Start (Completion Check)
+  // 3. 5 Minutes After Start (Completion Check / Late Alert)
   safeSchedule(`after_start_${task._id}`, new Date(startTime.getTime() + 5 * 60000), async () => {
     const Task = require('../models/task.model');
     const fresh = await Task.findById(task._id);
     if (!fresh || fresh.status === 'completed') return;
 
+    const quote = getLocalQuote('High', user.detectedGoal || user.goal);
     await logAndNotify(user, {
       taskId: task._id,
       type: 'critical',
-      title: `🔥 High Velocity: ${task.name}`,
-      body: `You are 5 minutes into the zone. Stay focused, do not break the chain!`,
-      quote: "Concentrate all your thoughts upon the work at hand.",
+      title: `🔥 High Alert: ${task.name}`,
+      body: `5 minutes past start. Don't let the momentum slip, get into the zone!`,
+      quote: quote || "Concentrate all your thoughts upon the work at hand.",
     });
   });
 
   // 4. 5 Minutes Before End (Completion Check)
-  // Only schedule if duration > 10 min to avoid overlapping with after-start logic
   if (duration >= 10) {
     safeSchedule(`prep_end_${task._id}`, new Date(endTime.getTime() - 5 * 60000), async () => {
       const Task = require('../models/task.model');
@@ -88,13 +89,12 @@ async function scheduleTaskNotification(task, user) {
         taskId: task._id,
         type: 'reminder',
         title: `🏁 Final Sprint: ${task.name}`,
-        body: `5 minutes remaining! Wrap up your current module and secure the win.`,
+        body: `5 minutes remaining! Finish strong and secure your XP.`,
         quote: "Finishing is just as important as starting.",
       });
     });
   }
 
-  // Deadline & Repeating logic preserved for system integrity
   if (task.deadline) {
     safeSchedule(`deadline_${task._id}`, new Date(new Date(task.deadline).getTime() - 15 * 60000), async () => {
       await logAndNotify(user, {
@@ -115,14 +115,12 @@ async function scheduleTaskNotification(task, user) {
 async function logAndNotify(user, payload) {
   const { taskId, type, title, body, quote = '', link = '' } = payload;
   
-  // 1. Log to Database
   try {
     await NotificationLog.create({ userId: user._id, taskId, type, title, body, quote, link, delivered: true });
   } catch (err) {
     console.error('DB Log Error:', err.message);
   }
 
-  // 2. Send Push Notification if token exists
   if (user.expoPushToken && Expo.isExpoPushToken(user.expoPushToken)) {
     const messages = [{
       to: user.expoPushToken,
@@ -199,6 +197,6 @@ module.exports = {
   scheduleSimpleReminder,
   cancelJob,
   cancelJobs,
-  logNotification: logAndNotify, // Export as alias for compatibility
+  logNotification: logAndNotify,
   restoreScheduledJobs,
 };

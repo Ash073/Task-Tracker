@@ -101,6 +101,7 @@ export default function DashboardScreen() {
   const lastOffset = useRef(0);
 
   const handleScroll = (event) => {
+    if (!isAuthenticated) return;
     const currentOffset = event.nativeEvent.contentOffset.y;
     if (currentOffset <= 0) {
       setShowTopBar(true);
@@ -214,6 +215,7 @@ export default function DashboardScreen() {
             </Text>
           </View>
           <Text style={s.streakText}>🔥 {user?.streak || 0} {t('streak')}</Text>
+          <Text style={s.xpMono}>{user?.xp || 0} XP</Text>
         </View>
 
         <View style={s.centeredHeader}>
@@ -334,11 +336,10 @@ export default function DashboardScreen() {
             </View>
           </View>
 
-          {/* Simple Hero - Cylindrical Design */}
+          {/* Simple Mode Indicator */}
           <View style={s.simpleModeContainer}>
              <View style={s.simpleModePill}>
-                <MaterialCommunityIcons name="leaf" size={14} color={Colors.accent} />
-                <Text style={s.simpleModeText}>{t('simple').toUpperCase()} VIEW MODE</Text>
+                <Text style={s.simpleModeText}>{t('simple').toUpperCase()} VIEW</Text>
              </View>
           </View>
         </View>
@@ -457,10 +458,6 @@ const s = StyleSheet.create({
   simpleItem: { flexDirection: 'row', alignItems: 'center', padding: 8, backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: 8 },
   ghostBtnSm: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 5, borderWidth: 1, borderColor: Colors.border },
   ghostBtnTextSmall: { fontSize: 11, color: Colors.text2, fontWeight: '700' },
-  statusBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(16,185,129,0.1)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, marginBottom: 8, borderWidth: 1, borderColor: 'rgba(16,185,129,0.2)' },
-  statusDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#10b981' },
-  statusDotGlow: { position: 'absolute', width: 8, height: 8, borderRadius: 4, backgroundColor: '#10b981' },
-  statusText: { color: '#10b981', fontSize: 10, fontWeight: '900', letterSpacing: 0.5, textTransform: 'uppercase' },
   simpleModeContainer: {
     alignItems: 'center',
     marginVertical: 10,
@@ -482,4 +479,18 @@ const s = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 1.5,
   },
+  statusBadge: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 8, 
+    backgroundColor: 'rgba(16,185,129,0.05)', 
+    paddingHorizontal: 16, 
+    paddingVertical: 10, 
+    borderRadius: 30, 
+    borderWidth: 1.5, 
+    borderColor: 'rgba(16,185,129,0.15)' 
+  },
+  statusDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#10b981' },
+  statusDotGlow: { position: 'absolute', width: 8, height: 8, borderRadius: 4, backgroundColor: '#10b981' },
+  statusText: { color: '#10b981', fontSize: 11, fontWeight: '900', letterSpacing: 1.5, textTransform: 'uppercase' },
 });

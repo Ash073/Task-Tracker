@@ -64,7 +64,7 @@ export default function Layout() {
           <img src="/logo.png" alt="Logo" style={{ width: '40px', height: '40px' }} />
           <div>
             <div className="sidebar-brand-name">TaskTracker</div>
-            <div className="sidebar-brand-sub">CORE ENGINE</div>
+            <div className="sidebar-brand-sub">Professional</div>
           </div>
         </div>
 
@@ -89,7 +89,7 @@ export default function Layout() {
 
         {/* Nav */}
         <nav style={{ flex: 1 }}>
-          <div className="label" style={{ marginBottom: '12px', opacity: 0.6, marginLeft: '14px' }}>{t('navigation')}</div>
+          <div className="label" style={{ marginBottom: '12px', opacity: 0.6, marginLeft: '14px' }}>{t('navigation').toUpperCase()}</div>
           {NAV_ITEMS
             .filter(item => !item.mode || item.mode === (user?.mode || 'simple'))
             .map((item, i) => (

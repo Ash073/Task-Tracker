@@ -13,6 +13,7 @@ export default function TabLayout() {
   const hydrated = useAuthStore((s) => s.hydrated);
   const router = useRouter();
   const pathname = usePathname();
+  const { width } = useWindowDimensions();
 
   const [isMinimized, setIsMinimized] = useState(true);
   const sidebarWidth = useRef(new Animated.Value(0)).current;
@@ -21,9 +22,12 @@ export default function TabLayout() {
   const showTopBar = useUIStore((s) => s.showTopBar);
   const topBarAnim = useRef(new Animated.Value(0)).current;
 
+  const switchMode = useAuthStore(s => s.switchMode);
+  const updateSettings = useAuthStore(s => s.updateSettings);
+
   useEffect(() => {
     if (hydrated && !isAuthenticated) {
-      router.replace('/login');
+      router.replace('/');
     }
   }, [hydrated, isAuthenticated]);
 
@@ -36,9 +40,10 @@ export default function TabLayout() {
     }).start();
   }, [showTopBar]);
 
-  if (!isAuthenticated) return null;
+  if (hydrated && !isAuthenticated) return null;
 
   const lang = user?.settings?.language || 'en';
+  const t = (key) => getTranslation(key, lang);
 
   const toggleSidebar = () => {
     const toValue = isMinimized ? width * 0.85 : 0;
@@ -66,11 +71,17 @@ export default function TabLayout() {
     { name: 'profile', title: t('profile'), icon: 'user', lib: ProfileIcon },
   ];
 
-  const switchMode = useAuthStore(s => s.switchMode);
-  const updateSettings = useAuthStore(s => s.updateSettings);
 
-  return (
+
+   return (
     <View style={s.container}>
+      <Animated.View 
+        style={[s.mainContent, { opacity: contentOpacity }]}
+        pointerEvents={isMinimized ? 'auto' : 'none'}
+      >
+        <Slot />
+      </Animated.View>
+
       {/* Integrated Top Bar */}
       <Animated.View style={[
         s.topBar, 
@@ -176,13 +187,6 @@ export default function TabLayout() {
           </Pressable>
         </View>
       </Animated.View>
-
-      <Animated.View 
-        style={[s.mainContent, { opacity: contentOpacity }]}
-        pointerEvents={isMinimized ? 'auto' : 'none'}
-      >
-        <Slot />
-      </Animated.View>
     </View>
   );
 }
@@ -203,7 +207,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    zIndex: 100,
+    zIndex: 9999,
     backgroundColor: 'transparent',
   },
   menuBubble: {
@@ -220,13 +224,14 @@ const s = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
+    zIndex: 10001,
   },
   sidebar: {
     backgroundColor: Colors.bg,
     borderRightColor: Colors.accent,
     borderRightWidth: 3,
     paddingTop: 45,
-    zIndex: 200,
+    zIndex: 10000,
     position: 'absolute',
     height: '100%',
     left: 0,

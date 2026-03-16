@@ -23,14 +23,13 @@ const LEVEL_NAMES = ['', 'Beginner', 'Focused', 'Dedicated', 'Achiever', 'Champi
 const LEVEL_XP = [0, 0, 50, 200, 500, 1000, 2000, 3500, 5000, 7500, 10000];
 
 export default function ProfileScreen() {
-  const { user, updateUser, updateSettings, logout, isAuthenticated } = useAuthStore();
+  const user = useAuthStore(s => s.user);
+  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
+  const logout = useAuthStore(s => s.logout);
+  const updateUser = useAuthStore(s => s.updateUser);
+  const updateSettings = useAuthStore(s => s.updateSettings);
   const router = useRouter();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace('/login');
-    }
-  }, [isAuthenticated]);
 
   const [stats, setStats] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -48,6 +47,7 @@ export default function ProfileScreen() {
   const lastOffset = useRef(0);
 
   const handleScroll = (event) => {
+    if (!isAuthenticated) return;
     const currentOffset = event.nativeEvent.contentOffset.y;
     if (currentOffset <= 0) {
       setShowTopBar(true);

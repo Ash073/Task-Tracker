@@ -168,8 +168,11 @@ router.post('/:id/complete', protect, async (req, res) => {
     }
 
     const nextXp = (user.xp || 0) + (task.xpReward || 0);
+    const nextLevel = Math.floor(nextXp / 200) + 1;
+
     await User.findByIdAndUpdate(user._id, {
       xp: nextXp,
+      level: nextLevel,
       streak,
       lastActiveDate: new Date(),
       $inc: { completedTasksCount: 1 }
