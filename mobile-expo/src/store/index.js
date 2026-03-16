@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
 
 export const useAuthStore = create((set, get) => ({
@@ -12,7 +13,7 @@ export const useAuthStore = create((set, get) => ({
     const res = await api.post('/auth/login', { email, password });
     const { token, user } = res.data;
     await SecureStore.setItemAsync('auth_token', token);
-    await SecureStore.setItemAsync('auth_user', JSON.stringify(user));
+    await AsyncStorage.setItem('auth_user', JSON.stringify(user));
     set({ user, token, isAuthenticated: true });
     return user;
   },
@@ -21,8 +22,9 @@ export const useAuthStore = create((set, get) => ({
     if (!expoPushToken || get().user?.expoPushToken === expoPushToken) return;
     try {
       await api.put('/profile', { expoPushToken });
-      set((state) => ({ user: { ...state.user, expoPushToken } }));
-      await SecureStore.setItemAsync('auth_user', JSON.stringify(get().user));
+      const updatedUser = { ...get().user, expoPushToken };
+      set({ user: updatedUser });
+      await AsyncStorage.setItem('auth_user', JSON.stringify(updatedUser));
     } catch (e) {
       console.error('Push registration failed:', e);
     }
@@ -32,36 +34,42 @@ export const useAuthStore = create((set, get) => ({
     const res = await api.post('/auth/register', { name, email, password, goal });
     const { token, user } = res.data;
     await SecureStore.setItemAsync('auth_token', token);
-    await SecureStore.setItemAsync('auth_user', JSON.stringify(user));
+    await AsyncStorage.setItem('auth_user', JSON.stringify(user));
     set({ user, token, isAuthenticated: true });
     return user;
   },
 
   logout: async () => {
     await SecureStore.deleteItemAsync('auth_token');
-    await SecureStore.deleteItemAsync('auth_user');
+    await AsyncStorage.removeItem('auth_user');
+    await AsyncStorage.removeItem('cached_tasks');
     set({ user: null, token: null, isAuthenticated: false });
   },
 
-  updateUser: (updates) => set((state) => ({ user: { ...state.user, ...updates } })),
+  updateUser: async (updates) => {
+    const newUser = { ...get().user, ...updates };
+    set({ user: newUser });
+    await AsyncStorage.setItem('auth_user', JSON.stringify(newUser));
+  },
 
   updateSettings: async (settings) => {
     const res = await api.put('/profile', { settings: { ...get().user?.settings, ...settings } });
     const updatedUser = res.data;
-    set((state) => ({ user: { ...state.user, ...updatedUser } }));
-    await SecureStore.setItemAsync('auth_user', JSON.stringify({ ...get().user }));
+    set({ user: updatedUser });
+    await AsyncStorage.setItem('auth_user', JSON.stringify(updatedUser));
   },
 
   switchMode: async (mode) => {
     await api.put('/profile', { mode });
-    set((state) => ({ user: { ...state.user, mode } }));
-    await SecureStore.setItemAsync('auth_user', JSON.stringify({ ...get().user }));
+    const updatedUser = { ...get().user, mode };
+    set({ user: updatedUser });
+    await AsyncStorage.setItem('auth_user', JSON.stringify(updatedUser));
   },
 
   hydrate: async () => {
     try {
       const token = await SecureStore.getItemAsync('auth_token');
-      const userStr = await SecureStore.getItemAsync('auth_user');
+      const userStr = await AsyncStorage.getItem('auth_user');
       if (token && userStr) {
         const user = JSON.parse(userStr);
         set({ user, token, isAuthenticated: true, hydrated: true });
@@ -83,7 +91,7 @@ export const useTaskStore = create((set, get) => ({
     try {
       // 1. Try to load from cache if store is empty
       if (get().tasks.length === 0) {
-        const cached = await SecureStore.getItemAsync('cached_tasks');
+        const cached = await AsyncStorage.getItem('cached_tasks');
         if (cached) {
           set({ tasks: JSON.parse(cached) });
         }
@@ -94,7 +102,7 @@ export const useTaskStore = create((set, get) => ({
       
       set({ tasks: res.data });
       // 2. Persist for next session
-      await SecureStore.setItemAsync('cached_tasks', JSON.stringify(res.data));
+      await AsyncStorage.setItem('cached_tasks', JSON.stringify(res.data));
     } catch (e) {
       console.warn('Sync failed, using cache', e.message);
     } finally {
@@ -106,22 +114,20 @@ export const useTaskStore = create((set, get) => ({
     const res = await api.post('/tasks', task);
     const newTasks = [...get().tasks, res.data];
     set({ tasks: newTasks });
-    await SecureStore.setItemAsync('cached_tasks', JSON.stringify(newTasks));
+    await AsyncStorage.setItem('cached_tasks', JSON.stringify(newTasks));
     return res.data;
   },
 
   bulkCreateTasks: async (tasks) => {
-    const res = await api.post('/tasks/bulk', { tasks });
-    // Optimize: Don't refetch everything, merge or just fetch once
+    await api.post('/tasks/bulk', { tasks });
     await get().fetchTasks(); 
-    return res.data;
   },
 
   updateTask: async (id, updates) => {
     const res = await api.put(`/tasks/${id}`, updates);
     const updated = get().tasks.map((t) => (t._id === id ? res.data : t));
     set({ tasks: updated });
-    await SecureStore.setItemAsync('cached_tasks', JSON.stringify(updated));
+    await AsyncStorage.setItem('cached_tasks', JSON.stringify(updated));
     return res.data;
   },
 
@@ -129,7 +135,7 @@ export const useTaskStore = create((set, get) => ({
     const res = await api.post(`/tasks/${id}/complete`);
     const updated = get().tasks.map((t) => (t._id === id ? res.data.task : t));
     set({ tasks: updated });
-    await SecureStore.setItemAsync('cached_tasks', JSON.stringify(updated));
+    await AsyncStorage.setItem('cached_tasks', JSON.stringify(updated));
     return res.data;
   },
 
@@ -137,14 +143,14 @@ export const useTaskStore = create((set, get) => ({
     await api.delete(`/tasks/${id}`);
     const filtered = get().tasks.filter((t) => t._id !== id);
     set({ tasks: filtered });
-    await SecureStore.setItemAsync('cached_tasks', JSON.stringify(filtered));
+    await AsyncStorage.setItem('cached_tasks', JSON.stringify(filtered));
   },
   
   bulkDeleteTasks: async (taskIds) => {
     await api.post('/tasks/bulk-delete', { taskIds });
     const filtered = get().tasks.filter((t) => !taskIds.includes(t._id));
     set({ tasks: filtered });
-    await SecureStore.setItemAsync('cached_tasks', JSON.stringify(filtered));
+    await AsyncStorage.setItem('cached_tasks', JSON.stringify(filtered));
   },
 }));
 

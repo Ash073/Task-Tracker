@@ -9,11 +9,10 @@ import { ShoppingIcon, DashboardIcon, ProfileIcon, SettingsIcon } from '../../sr
 
 export default function TabLayout() {
   const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const hydrated = useAuthStore((s) => s.hydrated);
   const router = useRouter();
   const pathname = usePathname();
-  const lang = user?.settings?.language || 'en';
-  const t = (key) => getTranslation(key, lang);
-  const { width } = useWindowDimensions();
 
   const [isMinimized, setIsMinimized] = useState(true);
   const sidebarWidth = useRef(new Animated.Value(0)).current;
@@ -23,6 +22,12 @@ export default function TabLayout() {
   const topBarAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    if (hydrated && !isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [hydrated, isAuthenticated]);
+
+  useEffect(() => {
     Animated.spring(topBarAnim, {
       toValue: showTopBar ? 0 : -120,
       useNativeDriver: true,
@@ -30,6 +35,10 @@ export default function TabLayout() {
       tension: 40,
     }).start();
   }, [showTopBar]);
+
+  if (!isAuthenticated) return null;
+
+  const lang = user?.settings?.language || 'en';
 
   const toggleSidebar = () => {
     const toValue = isMinimized ? width * 0.85 : 0;

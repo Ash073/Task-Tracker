@@ -14,6 +14,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../src/store';
 import { Colors } from '../src/config/theme';
+import { Feather } from '@expo/vector-icons';
 
 export default function RegisterScreen() {
   const [form, setForm] = useState({ name: '', email: '', password: '', goal: '' });
@@ -44,69 +45,81 @@ export default function RegisterScreen() {
   return (
     <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
+        <Pressable style={s.backBtn} onPress={() => router.back()}>
+          <Feather name="chevron-left" size={24} color={Colors.text2} />
+        </Pressable>
+
         <View style={s.header}>
           <Text style={s.logo}>
             <Text style={{ color: Colors.accent }}>Task</Text>Tracker
           </Text>
-          <Text style={s.tagline}>Start achieving your goals today</Text>
+          <Text style={s.tagline}>Initialize new tracking profile...</Text>
         </View>
 
         <View style={s.card}>
-          <Text style={s.cardTitle}>Create Account</Text>
+          <Text style={s.cardTitle}>Identity Creation</Text>
 
-          <Text style={s.label}>Full Name</Text>
-          <TextInput
-            style={s.input}
-            placeholder="John Doe"
-            placeholderTextColor={Colors.text3}
-            value={form.name}
-            onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
-          />
+          <View style={s.inputContainer}>
+            <Text style={s.label}>Full Designation</Text>
+            <TextInput
+              style={s.input}
+              placeholder="e.g. John Operator"
+              placeholderTextColor={Colors.text3}
+              value={form.name}
+              onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
+            />
+          </View>
 
-          <Text style={s.label}>Email</Text>
-          <TextInput
-            style={s.input}
-            placeholder="you@example.com"
-            placeholderTextColor={Colors.text3}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={form.email}
-            onChangeText={(v) => setForm((f) => ({ ...f, email: v }))}
-          />
+          <View style={s.inputContainer}>
+            <Text style={s.label}>Communication Link (Email)</Text>
+            <TextInput
+              style={s.input}
+              placeholder="you@example.com"
+              placeholderTextColor={Colors.text3}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={form.email}
+              onChangeText={(v) => setForm((f) => ({ ...f, email: v }))}
+            />
+          </View>
 
-          <Text style={s.label}>Password</Text>
-          <TextInput
-            style={s.input}
-            placeholder="Min 6 characters"
-            placeholderTextColor={Colors.text3}
-            secureTextEntry
-            value={form.password}
-            onChangeText={(v) => setForm((f) => ({ ...f, password: v }))}
-          />
+          <View style={s.inputContainer}>
+            <Text style={s.label}>Security Phrase (Password)</Text>
+            <TextInput
+              style={s.input}
+              placeholder="Min 6 characters"
+              placeholderTextColor={Colors.text3}
+              secureTextEntry
+              value={form.password}
+              onChangeText={(v) => setForm((f) => ({ ...f, password: v }))}
+            />
+          </View>
 
-          <Text style={s.label}>Main Goal (optional)</Text>
-          <TextInput
-            style={s.input}
-            placeholder="e.g. Get placement, Pass exam, Get fit..."
-            placeholderTextColor={Colors.text3}
-            value={form.goal}
-            onChangeText={(v) => setForm((f) => ({ ...f, goal: v }))}
-          />
+          <View style={s.inputContainer}>
+            <Text style={s.label}>Primary Objective (optional)</Text>
+            <TextInput
+              style={s.input}
+              placeholder="e.g. Master React Native"
+              placeholderTextColor={Colors.text3}
+              value={form.goal}
+              onChangeText={(v) => setForm((f) => ({ ...f, goal: v }))}
+            />
+          </View>
 
           <Pressable style={[s.btn, loading && s.btnDisabled]} onPress={handleSubmit} disabled={loading}>
             {loading ? (
               <ActivityIndicator color={Colors.white} />
             ) : (
-              <Text style={s.btnText}>Create Account</Text>
+              <Text style={s.btnText}>ACTIVATE PROFILE</Text>
             )}
           </Pressable>
-
-          <Pressable onPress={() => router.push('/login')} style={s.linkRow}>
-            <Text style={s.linkText}>
-              Have account? <Text style={{ color: Colors.accent }}>Sign In</Text>
-            </Text>
-          </Pressable>
         </View>
+
+        <Pressable onPress={() => router.push('/login')} style={s.linkRow}>
+          <Text style={s.linkText}>
+            Existing entity? <Text style={{ color: Colors.accent, fontWeight: '700' }}>Sign In</Text>
+          </Text>
+        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -114,31 +127,33 @@ export default function RegisterScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
-  scroll: { flexGrow: 1, justifyContent: 'center', padding: 20 },
+  scroll: { flexGrow: 1, justifyContent: 'center', padding: 28 },
+  backBtn: { position: 'absolute', top: 60, left: 24, zIndex: 10 },
   header: { alignItems: 'center', marginBottom: 40 },
-  logo: { fontSize: 32, fontWeight: '800', color: Colors.text, letterSpacing: -1 },
-  tagline: { color: Colors.text2, marginTop: 8, fontSize: 14 },
-  card: { backgroundColor: Colors.card, borderRadius: 12, padding: 28, borderWidth: 1, borderColor: Colors.border },
-  cardTitle: { fontSize: 22, fontWeight: '700', color: Colors.text, marginBottom: 24 },
-  label: { fontSize: 13, fontWeight: '600', color: Colors.text2, marginBottom: 6, marginTop: 12 },
+  logo: { fontSize: 32, fontWeight: '900', color: Colors.text, letterSpacing: -1.5 },
+  tagline: { color: Colors.text3, marginTop: 4, fontSize: 13, textTransform: 'uppercase', letterSpacing: 1 },
+  card: { backgroundColor: Colors.card, borderRadius: 24, padding: 32, borderWidth: 1, borderColor: Colors.border },
+  cardTitle: { fontSize: 22, fontWeight: '800', color: Colors.text, marginBottom: 32 },
+  inputContainer: { marginBottom: 20 },
+  label: { fontSize: 11, fontWeight: '700', color: Colors.text3, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
   input: {
     backgroundColor: Colors.bg2,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: 8,
-    padding: 14,
+    borderRadius: 16,
+    padding: 18,
     color: Colors.text,
-    fontSize: 15,
+    fontSize: 16,
   },
   btn: {
     backgroundColor: Colors.accent,
-    borderRadius: 8,
-    padding: 16,
+    borderRadius: 16,
+    padding: 20,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 12,
   },
   btnDisabled: { opacity: 0.6 },
-  btnText: { color: Colors.white, fontWeight: '700', fontSize: 16 },
-  linkRow: { alignItems: 'center', marginTop: 16 },
+  btnText: { color: Colors.white, fontWeight: '900', fontSize: 15, letterSpacing: 1 },
+  linkRow: { alignItems: 'center', marginTop: 32 },
   linkText: { color: Colors.text2, fontSize: 14 },
 });

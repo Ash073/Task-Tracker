@@ -330,12 +330,12 @@ export default function DashboardScreen() {
             </View>
           </View>
 
-          {/* Simple Hero */}
-          <View style={[s.card, { backgroundColor: 'rgba(59,130,246,0.05)', borderColor: 'rgba(59,130,246,0.2)' }]}>
-             <Text style={{ color: Colors.text, textAlign: 'center', fontWeight: '800', fontSize: 16 }}>{t('simple').toUpperCase()} {t('view_mode')}</Text>
-             <Text style={{ color: Colors.text2, textAlign: 'center', fontSize: 12, marginTop: 8, lineHeight: 18 }}>
-                {t('system_operational')}
-             </Text>
+          {/* Simple Hero - Cylindrical Design */}
+          <View style={s.simpleModeContainer}>
+             <View style={s.simpleModePill}>
+                <MaterialCommunityIcons name="leaf" size={14} color={Colors.accent} />
+                <Text style={s.simpleModeText}>{t('simple').toUpperCase()} VIEW MODE</Text>
+             </View>
           </View>
         </View>
       )}
@@ -457,4 +457,25 @@ const s = StyleSheet.create({
   statusDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#10b981' },
   statusDotGlow: { position: 'absolute', width: 8, height: 8, borderRadius: 4, backgroundColor: '#10b981' },
   statusText: { color: '#10b981', fontSize: 10, fontWeight: '900', letterSpacing: 0.5, textTransform: 'uppercase' },
+  simpleModeContainer: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  simpleModePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 30,
+    borderWidth: 1.5,
+    borderColor: 'rgba(59, 130, 246, 0.4)',
+    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+    gap: 10,
+  },
+  simpleModeText: {
+    color: Colors.text,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+  },
 });

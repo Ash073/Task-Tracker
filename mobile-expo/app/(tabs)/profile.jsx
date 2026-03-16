@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuthStore, useUIStore } from '../../src/store';
+import { useRouter } from 'expo-router';
 import api from '../../src/services/api';
 import { Colors } from '../../src/config/theme';
 import { getTranslation } from '../../src/services/i18n';
@@ -22,7 +23,15 @@ const LEVEL_NAMES = ['', 'Beginner', 'Focused', 'Dedicated', 'Achiever', 'Champi
 const LEVEL_XP = [0, 0, 50, 200, 500, 1000, 2000, 3500, 5000, 7500, 10000];
 
 export default function ProfileScreen() {
-  const { user, updateUser, updateSettings, logout } = useAuthStore();
+  const { user, updateUser, updateSettings, logout, isAuthenticated } = useAuthStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated]);
+
   const [stats, setStats] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [insights, setInsights] = useState('');

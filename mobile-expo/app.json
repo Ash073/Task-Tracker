@@ -58,6 +58,12 @@
         }
       ]
     ],
+    "updates": {
+      "url": "https://u.expo.dev/tasktracker-mobile"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "experiments": {
       "typedRoutes": false
     }
